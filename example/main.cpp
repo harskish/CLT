@@ -5,13 +5,17 @@
 
 cl::Buffer input;
 cl::Buffer output;
-cl_uint N = 0;
+const cl_uint N = 5;
+cl_uint P = 1;
 
 class TestKernel : public clt::Kernel {
 public:
-    TestKernel(void) : Kernel("device.cl", "square") {};
+    TestKernel(void) : Kernel("device.cl", "power") {};
     std::string getAdditionalBuildOptions() override {
-        return " -DN=" + std::to_string(N);
+        std::string opts;        
+        opts += " -DN=" + std::to_string(N);
+        opts += " -DP=" + std::to_string(P);
+        return opts;
     };
     void setArgs() override {
         setArg("input", input);
@@ -27,13 +31,9 @@ int main(int argc, char* argv[]) {
     clt::setKernelCacheDir("./kernel_cache");
     clt::setGlobalBuildOptions("-DTEST=1");
     clt::setCpuDebug(false);
-
-    std::cout << "Enter array length: ";
-    std::cin >> N;
-    N = std::max(1U, std::min(1000U, N));
     
-    cl_uint* indata = new cl_uint[N];
-    std::iota(indata, indata + N, 0); // fill with 0 ... N-1
+    cl_uint indata[N];
+    std::iota(indata, indata + N, 1); // fill with 1 ... N
 
     int err = 0;
     input = cl::Buffer(state.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N * sizeof(cl_uint), indata, &err);
@@ -45,19 +45,22 @@ int main(int argc, char* argv[]) {
     TestKernel kernel;
     kernel.build(state.context, state.device, state.platform);
 
-    err = state.cmdQueue.enqueueNDRangeKernel(kernel, cl::NDRange(0), cl::NDRange(N));
-    clt::check(err, "Failed to enqueue kernel");
+    for (int i = 1; i <= 5; i++) {
+        P = (cl_uint)i;
+        kernel.rebuild(false); // P has changed
 
-    err = state.cmdQueue.finish();
-    clt::check(err, "Could not finish command queue");
+        err = state.cmdQueue.enqueueNDRangeKernel(kernel, cl::NDRange(0), cl::NDRange(N));
+        clt::check(err, "Failed to enqueue kernel");
 
-    err = state.cmdQueue.enqueueReadBuffer(output, CL_TRUE, 0, N * sizeof(cl_uint), indata);
-    clt::check(err, "Could not read from output buffer");
+        err = state.cmdQueue.finish();
+        clt::check(err, "Could not finish command queue");
 
-    std::cout << "Output: " << std::endl;
-    for (int i = 0; i < N; i++)
-        std::cout << i << "^2 = " << indata[i] << std::endl;
+        err = state.cmdQueue.enqueueReadBuffer(output, CL_TRUE, 0, N * sizeof(cl_uint), indata);
+        clt::check(err, "Could not read from output buffer");
 
-    delete[] indata;
+        for (int i = 0; i < N; i++)
+            std::cout << (i + 1) << "^" << P << " = " << indata[i] << std::endl;
+    }
+
     return 0;
 }

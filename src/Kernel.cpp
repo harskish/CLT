@@ -99,9 +99,9 @@ void Kernel::rebuild(bool setArgs)
 bool Kernel::configHasChanged()
 {
     std::string buildOpts = globalBuildOpts + getAdditionalBuildOptions();
-#ifdef CPU_DEBUGGING
-    buildOpts += " -g -s \"" + getAbsolutePath(m_sourcePath) + "\"";
-#endif
+    buildOpts += " -cl-kernel-arg-info";
+    if (Kernel::CPU_DEBUG)
+        buildOpts += " -g -s \"" + getAbsolutePath(m_sourcePath) + "\"";
     return (buildOpts.compare(lastBuildOpts) != 0);
 }
 

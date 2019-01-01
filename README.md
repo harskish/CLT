@@ -21,12 +21,24 @@ CLT is a toolkit that makes managing large-scale OpenCL codebases easier. In par
 ## Usage
 
 1. Add CLT as a git submodule.
-2. Create a kernel class that extends clt::Kernel.
-	- Define kernel arguments
-	- Define preprocessor definitions
-3. Call clt::initialize() (or initialize OpenCL manually)
+2. Call clt::initialize() (or initialize OpenCL manually)
+3. Create a kernel class that extends clt::Kernel:
+	```c++
+    class MyKernel : public clt::Kernel {
+    public:
+        MyKernel (void) : Kernel("kernel.cl", "mainFunc") {};
+        std::string getAdditionalBuildOptions() override {
+            return " -DCONFIG_OPTION=" + std::to_string(global_variable);
+        };
+        void setArgs() override {
+            setArg("input", inputArr);
+            setArg("output", outputArr);
+        }
+    };
+    ```
+4. Call mykernel.build(), call rebuild() whenever configuration has changed
 
-Check examples/ for more information.
+Check [example/](example/) for more information.
 
 ## License
 

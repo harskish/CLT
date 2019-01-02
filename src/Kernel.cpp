@@ -11,16 +11,6 @@ std::string Kernel::cacheDir = "cache/kernel_binaries";
 bool Kernel::CPU_DEBUG = false;
 void* Kernel::userPtr = nullptr;
 
-// Check CL command success
-void Kernel::verify(int code, const std::string msg) {
-    if (code != CL_SUCCESS)
-    {
-        std::string message = msg + " (" + getCLErrorString(code) + ")";
-        std::cout << message << std::endl;
-        waitExit();
-    }
-}
-
 void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platform, bool setArgs)
 {
     // No need to recompile, just update arguments
@@ -62,28 +52,28 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
         if (buildLog.length() > 2)
             std::cout << "\n[" << m_sourcePath << " build log]:" << buildLog << std::endl;
 
-        verify(err, "Kernel compilation failed");
+        check(err, "Kernel compilation failed");
     }
     else
     {
         // Build program using cache or sources
         program = kernelFromFile(m_sourcePath, buildOpts, Kernel::cacheDir, platform, context, device, err);
-        verify(err, "Failed to create kernel program");
+        check(err, "Failed to create kernel program");
     }
 
     // Creating compute kernel from program
     m_kernel = cl::Kernel(program, m_entryPoint.c_str(), &err);
-    verify(err, "Failed to create compute kernel!");
+    check(err, "Failed to create compute kernel!");
 
     // Get kernel argument names
     // NB: kernels built from binaries SHOULD NOT have arg info, but they do at least on Intel/NV!
     argMap.clear();
     cl_uint numArgs = m_kernel.getInfo<CL_KERNEL_NUM_ARGS>(&err);
-    verify(err, "Getting KERNEL_NUM_ARGS failed for " + filename);
+    check(err, "Getting KERNEL_NUM_ARGS failed for " + filename);
     for (cl_uint i = 0; i < numArgs; i++)
     {
         auto argname = m_kernel.getArgInfo<CL_KERNEL_ARG_NAME>(i, &err);
-        verify(err, "Getting CL_KERNEL_ARG_NAME failed for " + filename);
+        check(err, "Getting CL_KERNEL_ARG_NAME failed for " + filename);
         argMap[argname] = i; // save to mapping
     }
 

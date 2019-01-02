@@ -68,9 +68,6 @@ protected:
     virtual std::string getAdditionalBuildOptions() { return ""; };
     virtual void setArgs() = 0;
 
-    // Check CL return code
-    void verify(int code, const std::string msg);
-
     static void* userPtr;
 };
 

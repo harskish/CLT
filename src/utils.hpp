@@ -30,7 +30,7 @@ inline void waitExit()
     exit(-1);
 }
 
-void check(int err, const char* msg);
+void check(int err, const std::string msg);
 
 bool platformIsNvidia(cl::Platform& platform);
 
@@ -54,6 +54,7 @@ typedef struct {
     cl::Device device;
     cl::Context context;
     cl::CommandQueue cmdQueue;
+    bool hasGLInterop = false;
 } State;
 
 // Does OpenCL initialization

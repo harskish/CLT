@@ -19,7 +19,7 @@
 
 namespace clt {
 
-void check(int err, const char * msg)
+void check(int err, const std::string msg)
 {
     if (err != CL_SUCCESS)
     {
@@ -199,7 +199,7 @@ State initialize(const std::string& platformName, const std::string& deviceName)
     cl::Platform::get(&platforms);
 
     if (platforms.size() == 0) {
-        std::cout << "No OpenCL platforms found. Please install an OpenCL SDK." << std::endl;
+        std::cout << "No OpenCL platforms found. Please install an OpenCL SDK" << std::endl;
         exit(-1);
     }
 
@@ -210,7 +210,7 @@ State initialize(const std::string& platformName, const std::string& deviceName)
     state.platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
     if (devices.size() == 0) {
-        std::cout << "No device found that matches the given criteria." << std::endl;
+        std::cout << "No device found that matches the given criteria" << std::endl;
         exit(-1);
     }
 
@@ -226,36 +226,56 @@ State initialize(const std::string& platformName, const std::string& deviceName)
     bool hasGLSharing = extensions.find("cl_APPLE_gl_sharing") != std::string::npos
             || extensions.find("cl_khr_gl_sharing") != std::string::npos;
 
-    std::cout << "TEST: Setting GL-sharing to false" << std::endl;
-    hasGLSharing = false;
-
 #ifdef CLT_HAS_GL
     if (hasGLSharing)
     {
-#ifdef __APPLE__
-        CGLContextObj kCGLContext = CGLGetCurrentContext();
-        CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
-        cl_context_properties props[] =
+        auto getGLContext = []()
         {
-            CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
-                (cl_context_properties)kCGLShareGroup, 0
-        };
-#else
-        cl_context_properties props[] = {
-            CL_CONTEXT_PLATFORM, (cl_context_properties)state.platform(),
-        #if defined(__linux__)
-            CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
-            CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
+        #ifdef __APPLE__
+            return CGLGetCurrentContext();
+        #elif defined(__linux__)
+            return glXGetCurrentContext();
         #elif defined(_WIN32)
-            CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
-            CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+            return wglGetCurrentContext();
+        #else
+            return nullptr;
         #endif
-            0
         };
 
-        std::cout << "Creating GL-CL context" << std::endl;
-        state.context = cl::Context(devices, props, NULL, NULL, &err);
-#endif
+        auto glCtx = getGLContext();
+        if (!glCtx)
+        {
+            std::cout << "OpenGL has not been initialized, cannot create CL-GL shared context" << std::endl;
+            state.context = cl::Context(devices, NULL, NULL, NULL, &err);
+        }
+        else
+        {
+        #ifdef __APPLE__
+            CGLContextObj kCGLContext = glCtx;
+            CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
+            cl_context_properties props[] =
+            {
+                CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
+                    (cl_context_properties)kCGLShareGroup, 0
+            };
+        #else
+            cl_context_properties props[] = {
+                CL_CONTEXT_PLATFORM, (cl_context_properties)state.platform(),
+            #if defined(__linux__)
+                CL_GL_CONTEXT_KHR, (cl_context_properties)glCtx,
+                CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
+            #elif defined(_WIN32)
+                CL_GL_CONTEXT_KHR, (cl_context_properties)glCtx,
+                CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+            #endif
+                0
+            };
+
+            std::cout << "Creating GL-CL context" << std::endl;
+            state.context = cl::Context(devices, props, NULL, NULL, &err);
+            state.hasGLInterop = true;
+        #endif
+        }
     }
     else {
         std::cout << "Creating CL only context" << std::endl;

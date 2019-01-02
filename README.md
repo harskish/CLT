@@ -1,21 +1,23 @@
 CLT - An OpenCL Toolkit
 ====================
 
-CLT is a toolkit that makes managing large-scale OpenCL codebases easier. In particular, CLT does the following:
+CLT is a toolkit that makes managing large-scale OpenCL codebases easier.
 
 ## Features
 - Context creation:
 	- Platform and device selection by name
-	- GL-CL context sharing setup
+	- GL-CL interop setup
 	- CPU debugging setup (Intel processors)
 - Custom kernel class with several convenience features
 	- Kernels implemented as classes
-		- All initialization exists in one place
+		- All setup exists in one place
+        - No initialization step is accidentally forgotten
     - Kernel arguments set by name (not by idx)
 		- Adding new arguments does not invalidate old argument indices
     - Supports conservative recompilation when preprocessor definitions change
 		- Can turn off branches with #ifdefs to keep register pressure low
-    - Kernel binaries cached for massive speedup
+- Kernel binaries cached for a massive speedup
+    - Special care is taken to support #includes on all platforms (default NVIDIA kernel cache does not)
 
 
 ## Usage

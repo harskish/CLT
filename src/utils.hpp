@@ -37,6 +37,7 @@ bool platformIsNvidia(cl::Platform& platform);
 std::string getCLErrorString(int code);
 std::string getAbsolutePath(std::string filename);
 std::string getFileName(const std::string path);
+std::string createTempKernelFile(const std::string source, const std::string entryPoint);
 
 void printDevices();
 void setKernelCacheDir(const std::string path);

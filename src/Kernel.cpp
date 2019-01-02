@@ -21,6 +21,10 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
         return;
     }
 
+    // Inlined kernels are saved to temporary files
+    if (isInlined())
+        m_sourcePath = createTempKernelFile(getSource(), m_entryPoint);
+
     const std::string filename = getFileName(m_sourcePath);
 
     this->context = &context;

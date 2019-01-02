@@ -5,6 +5,9 @@
 #include <iostream>
 #include <map>
 
+// Used when inlining the kernel implementation
+#define CLT_KERNEL_IMPL(...) std::string getSource() override { return std::string(#__VA_ARGS__); }
+
 namespace clt {
 
 class Kernel
@@ -67,6 +70,12 @@ private:
 protected:
     virtual std::string getAdditionalBuildOptions() { return ""; };
     virtual void setArgs() = 0;
+
+    // Implement this to use inlined kernel sources
+    virtual std::string getSource() { return ""; };
+    bool isInlined() {
+        return getSource().compare("") != 0;
+    }
 
     static void* userPtr;
 };

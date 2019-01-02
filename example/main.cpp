@@ -16,11 +16,21 @@ public:
         opts += " -DN=" + std::to_string(N);
         opts += " -DP=" + std::to_string(P);
         return opts;
-    };
+    }
     void setArgs() override {
         setArg("input", input);
         setArg("output", output);
     }
+    /*
+    CLT_KERNEL_IMPL(
+    kernel void power(global int* input, global int* output) {
+        uint gid = get_global_id(0);
+        if (gid >= N)
+            return;
+    
+        output[gid] = gid;
+    })
+    */
 };
 
 int main(int argc, char* argv[]) {

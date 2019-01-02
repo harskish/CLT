@@ -70,6 +70,21 @@ std::string unixifyPath(std::string path)
     return path;
 }
 
+// Inline kernels are saved to disk
+std::string createTempKernelFile(const std::string source, const std::string entryPoint)
+{
+    const std::string targetPath = entryPoint + "_inline.cl";
+    std::ofstream f(targetPath);
+    if (!f)
+    {
+        std::cout << "Could not create tmp file for inlined kernel " << entryPoint << std::endl;
+        waitExit();
+    }
+
+    f.write(source.c_str(), source.length());
+    return targetPath;
+}
+
 std::string getFileName(const std::string path)
 {
     const std::string upath = unixifyPath(path);

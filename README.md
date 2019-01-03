@@ -23,7 +23,7 @@ CLT is a toolkit that makes managing large-scale OpenCL codebases easier.
 
 ## Usage
 
-1. Add CLT as a git submodule.
+1. Add CLT as a git submodule, include clt.hpp
 2. Call clt::initialize() (or initialize OpenCL manually)
 3. Create a kernel class that extends clt::Kernel:
     ```c++
@@ -48,8 +48,11 @@ CLT is a toolkit that makes managing large-scale OpenCL codebases easier.
 4. Call mykernel.build()
 5. Call mykernel.rebuild() whenever configuration changes (only recompiled if needed)
 
-Check [example/](example/) for more information.
+See [example/](example/) for a usage example.  
+Check out [Fluctus][fluctus] to see CLT in use in a large-scale OpenCL codebase.
 
 ## License
 
 See the [LICENSE](./LICENSE.md) file for license rights and limitations (MIT).
+
+[fluctus]: https://github.com/harskish/fluctus

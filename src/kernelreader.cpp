@@ -3,7 +3,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <filesystem>
+#include <sys/stat.h>
+#include <errno.h>
+#if defined(_WIN32)
+#include <direct.h>   // _mkdir
+#endif
+
 
 namespace clt {
 
@@ -66,16 +71,45 @@ void verify(const char* msg, int err)
         waitExit();
     }
 }
+    
+bool createPath(const std::string& inpath)
+{
+    auto makeDirFun = [](const std::string& p)
+    {
+#if defined(_WIN32)
+        return _mkdir(p.c_str());
+#else
+        return mkdir(p.c_str(), 0755);
+#endif
+    };
+    
+    std::string path = unixifyPath(inpath);
+    if(makeDirFun(path) == -1)
+    {
+        switch(errno)
+        {
+            case ENOENT:
+                if (createPath(path.substr(0, path.find_last_of('/'))))
+                    return (makeDirFun(path) == 0);
+                else
+                    return false;
+            case EEXIST:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
+    return true;
+}
 
 // Create directory if it doesn't exist
 void createDirectory(const std::string dir)
 {
-    if (std::experimental::filesystem::exists(dir))
-        return;
-
-    if (!std::experimental::filesystem::create_directories(dir))
+    if (!createPath(dir))
         std::cout << "Could not create kernel cache directory " << dir << std::endl;
 }
+
 
 // Checks kernel cache for match, otherwise loads from source
 cl::Program kernelFromFile(const std::string path, const std::string buildOpts, const std::string cacheDir, cl::Platform & platform, cl::Context & context, cl::Device & device, int & err)

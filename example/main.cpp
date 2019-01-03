@@ -13,8 +13,8 @@ public:
     TestKernel(void) : Kernel("device.cl", "power") {};
     std::string getAdditionalBuildOptions() override {
         std::string opts;        
-        opts += " -DN=" + std::to_string(N);
-        opts += " -DP=" + std::to_string(P);
+        opts += " -DLEN=" + std::to_string(N);
+        opts += " -DPOWR=" + std::to_string(P);
         return opts;
     }
     void setArgs() override {
@@ -25,7 +25,7 @@ public:
     CLT_KERNEL_IMPL(
     kernel void power(global int* input, global int* output) {
         uint gid = get_global_id(0);
-        if (gid >= N)
+        if (gid >= LEN)
             return;
     
         output[gid] = gid;
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     clt::State state = clt::initialize("Intel", "i7");
 
     // Configure CLT
-    clt::setKernelCacheDir("./kernel_cache");
+    clt::setKernelCacheDir("./cache/kernel_cache/binaries");
     clt::setGlobalBuildOptions("-DTEST=1");
     clt::setCpuDebug(false);
     

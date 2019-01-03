@@ -3,7 +3,7 @@
 #include <string>
 #include <stdlib.h>
 #include <vector>
-#include <CL/cl2.hpp>
+#include "../external/CL/cl2.hpp"
 
 namespace clt {
 

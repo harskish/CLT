@@ -1,8 +1,8 @@
 #pragma once
 
-#include <CL/cl2.hpp>
 #include <vector>
 #include <string>
+#include "../external/CL/cl2.hpp"
 
 namespace clt {
 

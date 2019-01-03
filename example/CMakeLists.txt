@@ -12,7 +12,6 @@ configure_file(device.cl ${CMAKE_CURRENT_BINARY_DIR}/device.cl COPYONLY)
 
 set(INCLUDE_DIRS
     ../include
-    ../external
     ${OpenCL_INCLUDE_DIR}
 )
 

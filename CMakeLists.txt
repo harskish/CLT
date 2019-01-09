@@ -9,6 +9,7 @@ add_definitions(-DCL_HPP_TARGET_OPENCL_VERSION=120)
 
 # Version 1.2+ for getArgInfo
 find_package(OpenCL 1.2 REQUIRED)
+set(CLT_CL_INCLUDE_DIR ${OpenCL_INCLUDE_DIR} PARENT_SCOPE)
 
 # OpenGL for CL-GL shared context
 find_package(OpenGL)
@@ -28,6 +29,7 @@ add_library(CLT STATIC
 	external/xxhash/xxhash.c
 )
 
+set(CLT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include PARENT_SCOPE)
 set_target_properties(CLT PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(CLT PROPERTIES PUBLIC_HEADER include/clt.hpp)
 

@@ -3,9 +3,6 @@ project(Example1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-# OpenCL
-find_package(OpenCL 1.2 REQUIRED)
-
 # CLT library
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/clt)
 
@@ -13,8 +10,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/clt)
 configure_file(device.cl ${CMAKE_CURRENT_BINARY_DIR}/device.cl COPYONLY)
 
 set(INCLUDE_DIRS
-    ../include
-    ${OpenCL_INCLUDE_DIR}
+    ${CLT_INCLUDE_DIR}
+    ${CLT_CL_INCLUDE_DIR}
 )
 
 set(SOURCE_FILES

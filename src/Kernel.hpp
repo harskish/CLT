@@ -57,6 +57,7 @@ private:
     cl::Context* context;
     cl::Device* device;
     cl::Platform* platform;
+    bool deviceIsCPU = false;
 
     static std::string globalBuildOpts;
     static std::string cacheDir;

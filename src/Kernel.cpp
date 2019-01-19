@@ -30,6 +30,7 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     this->context = &context;
     this->device = &device;
     this->platform = &platform;
+    this->deviceIsCPU = (device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU);
 
     if (m_kernel())
         std::cout << "Rebuilding kernel " << filename << std::endl;
@@ -37,7 +38,7 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     // Define build options based on global + specialized options
     std::string buildOpts = globalBuildOpts + getAdditionalBuildOptions();
     buildOpts += " -cl-kernel-arg-info";
-    if (Kernel::CPU_DEBUG)
+    if (Kernel::CPU_DEBUG && deviceIsCPU)
         buildOpts += " -g -s \"" + getAbsolutePath(m_sourcePath) + "\"";
     this->lastBuildOpts = buildOpts;
     cl::Program program;
@@ -94,7 +95,7 @@ bool Kernel::configHasChanged()
 {
     std::string buildOpts = globalBuildOpts + getAdditionalBuildOptions();
     buildOpts += " -cl-kernel-arg-info";
-    if (Kernel::CPU_DEBUG)
+    if (Kernel::CPU_DEBUG && deviceIsCPU)
         buildOpts += " -g -s \"" + getAbsolutePath(m_sourcePath) + "\"";
     return (buildOpts.compare(lastBuildOpts) != 0);
 }

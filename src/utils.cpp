@@ -88,7 +88,7 @@ std::string createTempKernelFile(const std::string source, const std::string ent
 std::string getFileName(const std::string path)
 {
     const std::string upath = unixifyPath(path);
-    size_t idx = path.find("/", 0) + 1;
+    size_t idx = path.find_last_of("/") + 1;
     return upath.substr(idx, upath.length() - idx);
 }
 

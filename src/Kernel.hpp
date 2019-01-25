@@ -38,6 +38,7 @@ public:
     }
 
     bool hasArg(const std::string name) { return argMap.find(name) != argMap.end(); }
+    std::string getBuildLog() { return m_buildLog; }
 
     // For accessing compilation settings and device buffers
     static void setUserPointer(void* p) { Kernel::userPtr = p; }
@@ -67,6 +68,7 @@ private:
     cl::Kernel m_kernel;
     std::string lastBuildOpts; // for detecting need to recompile
     std::map<std::string, cl_uint> argMap;
+    std::string m_buildLog = ""; // last build log
 
 protected:
     virtual std::string getAdditionalBuildOptions() { return ""; };

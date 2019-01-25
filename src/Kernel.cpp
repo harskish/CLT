@@ -53,9 +53,9 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
         err = program.build(devices, buildOpts.c_str());
 
         // Check build log
-        std::string buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
-        if (buildLog.length() > 2)
-            std::cout << "\n[" << m_sourcePath << " build log]:" << buildLog << std::endl;
+        m_buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+        if (m_buildLog.length() > 2)
+            std::cout << "\n[" << m_sourcePath << " build log]:" << m_buildLog << std::endl;
 
         check(err, "Kernel compilation failed");
     }
@@ -64,6 +64,8 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
         // Build program using cache or sources
         program = kernelFromFile(m_sourcePath, buildOpts, Kernel::cacheDir, platform, context, device, err);
         check(err, "Failed to create kernel program");
+        m_buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device, &err);
+        check(err, "Failed to get program build log");
     }
 
     // Creating compute kernel from program

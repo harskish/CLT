@@ -49,7 +49,7 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     if (Kernel::CPU_DEBUG)
     {
         kernelFromSource(m_sourcePath, context, program, err);
-        cl::vector<cl::Device> devices = { device };
+        std::vector<cl::Device> devices = { device };
         err = program.build(devices, buildOpts.c_str());
 
         // Check build log
@@ -77,11 +77,16 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     argMap.clear();
     cl_uint numArgs = m_kernel.getInfo<CL_KERNEL_NUM_ARGS>(&err);
     check(err, "Getting KERNEL_NUM_ARGS failed for " + filename);
+    
+    // Copied into temp buffer because cl.hpp seems to produce invalid strings somehow
+    // Not an issue when using cl2.hpp, but need to support old header for compatibility
+    char buffer[128];
     for (cl_uint i = 0; i < numArgs; i++)
     {
-        auto argname = m_kernel.getArgInfo<CL_KERNEL_ARG_NAME>(i, &err);
+        std::string argname = m_kernel.getArgInfo<CL_KERNEL_ARG_NAME>(i, &err);
         check(err, "Getting CL_KERNEL_ARG_NAME failed for " + filename);
-        argMap[argname] = i; // save to mapping
+        snprintf(buffer, sizeof(buffer), "%s", argname.c_str());
+        argMap[buffer] = i; // save to mapping
     }
 
     // Set default arguments

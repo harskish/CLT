@@ -47,14 +47,18 @@ void kernelFromBinary(const std::string filename, cl::Context & context, cl::Dev
     }
 
     std::ifstream::pos_type pos = f.tellg();
-    cl::vector<unsigned char> binary((unsigned int)pos);
+    std::vector<unsigned char> binary((unsigned int)pos);
     f.seekg(0, std::ios::beg);
     f.read((char*)(&binary[0]), pos);
 
-    cl::Program::Binaries binaries;
-    binaries.push_back(binary);
-    cl::vector<cl_int> status;
-    cl::vector<cl::Device> devices = { device };
+#ifdef CLT_CL_1_HEADER
+    cl::Program::Binaries binaries(1, std::make_pair(static_cast<const void*>(binary.data()), pos));
+#else
+    cl::Program::Binaries binaries = { binary }; // push_back
+#endif
+
+    std::vector<cl_int> status;
+    std::vector<cl::Device> devices = { device };
     program = cl::Program(context, devices, binaries, &status, &err);
 
     // Check compilation status
@@ -139,14 +143,18 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
         std::cout << "Loading hashed kernel " << binaryPath << std::endl;
 
         std::ifstream::pos_type pos = binaryFile.tellg();
-        cl::vector<unsigned char> binary((unsigned int)pos);
+        std::vector<unsigned char> binary((unsigned int)pos);
         binaryFile.seekg(0, std::ios::beg);
         binaryFile.read((char*)(&binary[0]), pos);
 
-        cl::Program::Binaries binaries;
-        binaries.push_back(binary);
-        cl::vector<cl_int> status;
-        cl::vector<cl::Device> devices = { device };
+#ifdef CLT_CL_1_HEADER
+        cl::Program::Binaries binaries(1, std::make_pair(static_cast<const void*>(binary.data()), pos));
+#else
+        cl::Program::Binaries binaries = { binary }; // push_back?
+#endif
+
+        std::vector<cl_int> status;
+        std::vector<cl::Device> devices = { device };
         program = cl::Program(context, devices, binaries, &status, &err);
 
         // Check program status
@@ -162,7 +170,7 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
         std::cout << "Building kernel " << filename << std::endl;
 
         kernelFromSourceExpanded(path, context, program, err);
-        cl::vector<cl::Device> devices = { device };
+        std::vector<cl::Device> devices = { device };
         err = program.build(devices, buildOpts.c_str());
 
         // Check build log
@@ -172,9 +180,8 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
 
         verify("Kernel compilation failed", err);
         
-        auto ptxs = program.getInfo<CL_PROGRAM_BINARIES>();
-        std::vector<unsigned char> ptx = ptxs[0];
-        verify("Incorrect number of kernel binaries generated!", ptxs.size() != 1);
+        std::vector<size_t> sizes = program.getInfo<CL_PROGRAM_BINARY_SIZES>();
+        verify("Incorrect number of kernel binaries generated!", sizes.size() != 1);
 
         // Open target file in overwrite-mode
         std::ofstream stream;
@@ -185,8 +192,16 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
             waitExit();
         }
 
-        // Write binary to file
-        stream.write((const char*)ptx.data(), ptx.size());
+#ifdef CLT_CL_1_HEADER
+        std::vector<char*> ptxs = program.getInfo<CL_PROGRAM_BINARIES>();
+        stream.write(ptxs[0], sizes[0]);
+        delete[] ptxs[0];
+#else
+        std::vector<std::vector<unsigned char>> ptxs = program.getInfo<CL_PROGRAM_BINARIES>();
+        stream.write((const char*)ptxs[0].data(), sizes[0]);
+#endif
+
+        // Check write
         if (!stream.good())
         {
             std::cout << "Failed to write kernel binary" << std::endl;

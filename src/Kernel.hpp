@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include "../external/CL/cl2.hpp"
+#include "../include/cl_header.hpp"
 
 // Used when inlining the kernel implementation
 #define CLT_KERNEL_IMPL(...) std::string getSource() override { return std::string(#__VA_ARGS__); }

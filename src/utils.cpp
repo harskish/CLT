@@ -261,7 +261,7 @@ State initialize(const std::string& platformName, const std::string& deviceName)
         if (!glCtx)
         {
             std::cout << "OpenGL has not been initialized, cannot create CL-GL shared context" << std::endl;
-            state.context = cl::Context(devices, NULL, NULL, NULL, &err);
+            CLT_CALL(state.context = cl::Context(devices, NULL, NULL, NULL, &err), err);
         }
         else
         {
@@ -287,25 +287,25 @@ State initialize(const std::string& platformName, const std::string& deviceName)
             };
 
             std::cout << "Creating GL-CL context" << std::endl;
-            state.context = cl::Context(devices, props, NULL, NULL, &err);
+            CLT_CALL(state.context = cl::Context(devices, props, NULL, NULL, &err), err);
             state.hasGLInterop = true;
         #endif
         }
     }
     else {
         std::cout << "Creating CL only context" << std::endl;
-        state.context = cl::Context(devices, NULL, NULL, NULL, &err);
+        CLT_CALL(state.context = cl::Context(devices, NULL, NULL, NULL, &err), err);
     }
 #else
     if (hasGLSharing)
         std::cout << "CLT not built with OpenGL support, cannot create shared context" << std::endl;
-    state.context = cl::Context(devices, NULL, NULL, NULL, &err);
+    CLT_CALL(state.context = cl::Context(devices, NULL, NULL, NULL, &err), err);
 #endif
 
     check(err, "Failed to create context");
 
     // Create command queue for context
-    state.cmdQueue = cl::CommandQueue(state.context, state.device, CL_QUEUE_PROFILING_ENABLE, &err);
+    CLT_CALL(state.cmdQueue = cl::CommandQueue(state.context, state.device, CL_QUEUE_PROFILING_ENABLE, &err), err);
     check(err, "Failed to create command queue");
 
     return state;

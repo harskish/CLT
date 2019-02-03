@@ -51,8 +51,10 @@ CLT is a toolkit that makes managing large-scale OpenCL codebases easier.
 See [example/](example/) for a usage example.  
 Check out [Fluctus][fluctus] to see CLT in use in a large-scale OpenCL codebase.
 
+## Configuration
+
 CLT can be configured to use cl.hpp instead of cl2.hpp (for compatibility with older projects).
-This is done by defining `set(CLT_USE_CL_1_HEADER ON CACHE BOOL " " FORCE)` in `CMakeLists.txt`.
+This is done by adding `set(CLT_USE_LEGACY_HEADER ON CACHE BOOL " " FORCE)` and `add_definitions(-DCLT_CL_LEGACY_HEADER)` to `CMakeLists.txt`
 
 ## License
 

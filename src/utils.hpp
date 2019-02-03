@@ -30,6 +30,13 @@ inline void waitExit()
     exit(-1);
 }
 
+// Must support OpenCL with and without exceptions
+#if defined __CL_ENABLE_EXCEPTIONS || defined CL_HPP_ENABLE_EXCEPTIONS
+#define CLT_CALL(body, err) try { (body); } catch (cl::Error &e) { err = e.err(); }
+#else
+#define CLT_CALL(body, err) (body);
+#endif
+
 void check(int err, const std::string msg);
 
 bool platformIsNvidia(cl::Platform& platform);

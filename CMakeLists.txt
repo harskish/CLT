@@ -5,10 +5,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Cannot mix cl.hpp and ch2.hpp
 # Allow parent project to choose
-option(CLT_USE_CL_1_HEADER "Use cl.hpp instead of cl2.hpp" OFF)
-if (CLT_USE_CL_1_HEADER)
+option(CLT_USE_LEGACY_HEADER "Use cl.hpp instead of cl2.hpp" OFF)
+if (CLT_USE_LEGACY_HEADER)
     # Use cl.hpp
-    add_definitions(-DCLT_CL_1_HEADER)
+    add_definitions(-DCLT_CL_LEGACY_HEADER)
     message("-- CLT: using legacy header (cl.hpp)")
 else()
     # Use cl2.hpp in OCL 1.2 mode

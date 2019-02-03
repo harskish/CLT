@@ -25,14 +25,14 @@ void kernelFromSource(const std::string filename, cl::Context &context, cl::Prog
     buffer << f.rdbuf();
 
     const std::string &tmp = buffer.str();
-    program = cl::Program(context, tmp, false, &err);
+    CLT_CALL(program = cl::Program(context, tmp, false, &err), err);
 }
 
 // Perform include expanding
 void kernelFromSourceExpanded(const std::string filename, cl::Context & context, cl::Program & program, int & err)
 {
     std::string expandedSrc = readKernel(filename);
-    program = cl::Program(context, expandedSrc, false, &err);
+    CLT_CALL(program = cl::Program(context, expandedSrc, false, &err), err);
 }
 
 void kernelFromBinary(const std::string filename, cl::Context & context, cl::Device & device, cl::Program & program, int & err)
@@ -51,7 +51,7 @@ void kernelFromBinary(const std::string filename, cl::Context & context, cl::Dev
     f.seekg(0, std::ios::beg);
     f.read((char*)(&binary[0]), pos);
 
-#ifdef CLT_CL_1_HEADER
+#ifdef CLT_CL_LEGACY_HEADER
     cl::Program::Binaries binaries(1, std::make_pair(static_cast<const void*>(binary.data()), pos));
 #else
     cl::Program::Binaries binaries = { binary }; // push_back
@@ -59,7 +59,7 @@ void kernelFromBinary(const std::string filename, cl::Context & context, cl::Dev
 
     std::vector<cl_int> status;
     std::vector<cl::Device> devices = { device };
-    program = cl::Program(context, devices, binaries, &status, &err);
+    CLT_CALL(program = cl::Program(context, devices, binaries, &status, &err), err);
 
     // Check compilation status
     for (cl_int i : status) {
@@ -147,7 +147,7 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
         binaryFile.seekg(0, std::ios::beg);
         binaryFile.read((char*)(&binary[0]), pos);
 
-#ifdef CLT_CL_1_HEADER
+#ifdef CLT_CL_LEGACY_HEADER
         cl::Program::Binaries binaries(1, std::make_pair(static_cast<const void*>(binary.data()), pos));
 #else
         cl::Program::Binaries binaries = { binary }; // push_back?
@@ -155,7 +155,7 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
 
         std::vector<cl_int> status;
         std::vector<cl::Device> devices = { device };
-        program = cl::Program(context, devices, binaries, &status, &err);
+        CLT_CALL(program = cl::Program(context, devices, binaries, &status, &err), err);
 
         // Check program status
         for (cl_int i : status) err |= i;
@@ -171,10 +171,11 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
 
         kernelFromSourceExpanded(path, context, program, err);
         std::vector<cl::Device> devices = { device };
-        err = program.build(devices, buildOpts.c_str());
+        CLT_CALL(err = program.build(devices, buildOpts.c_str()), err);
 
         // Check build log
-        std::string buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+        std::string buildLog;
+        CLT_CALL(program.getBuildInfo(device, CL_PROGRAM_BUILD_LOG, &buildLog), err);
         if (buildLog.length() > 2)
             std::cout << "\n[" << filename << " build log]:" << buildLog << std::endl;
 
@@ -192,7 +193,7 @@ cl::Program kernelFromFile(const std::string path, const std::string buildOpts, 
             waitExit();
         }
 
-#ifdef CLT_CL_1_HEADER
+#ifdef CLT_CL_LEGACY_HEADER
         std::vector<char*> ptxs = program.getInfo<CL_PROGRAM_BINARIES>();
         stream.write(ptxs[0], sizes[0]);
         delete[] ptxs[0];

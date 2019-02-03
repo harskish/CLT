@@ -50,8 +50,8 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     {
         kernelFromSource(m_sourcePath, context, program, err);
         std::vector<cl::Device> devices = { device };
-        err = program.build(devices, buildOpts.c_str());
-
+        CLT_CALL(err = program.build(devices, buildOpts.c_str()), err);
+        
         // Check build log
         m_buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
         if (m_buildLog.length() > 2)
@@ -62,20 +62,21 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     else
     {
         // Build program using cache or sources
-        program = kernelFromFile(m_sourcePath, buildOpts, Kernel::cacheDir, platform, context, device, err);
+        CLT_CALL(program = kernelFromFile(m_sourcePath, buildOpts, Kernel::cacheDir, platform, context, device, err), err);
         check(err, "Failed to create kernel program");
-        m_buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device, &err);
+        CLT_CALL(m_buildLog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device, &err), err);
         check(err, "Failed to get program build log");
     }
 
     // Creating compute kernel from program
-    m_kernel = cl::Kernel(program, m_entryPoint.c_str(), &err);
+    CLT_CALL(m_kernel = cl::Kernel(program, m_entryPoint.c_str(), &err), err);
     check(err, "Failed to create compute kernel!");
 
     // Get kernel argument names
     // NB: kernels built from binaries SHOULD NOT have arg info, but they do at least on Intel/NV!
     argMap.clear();
-    cl_uint numArgs = m_kernel.getInfo<CL_KERNEL_NUM_ARGS>(&err);
+    cl_uint numArgs;
+    CLT_CALL(numArgs = m_kernel.getInfo<CL_KERNEL_NUM_ARGS>(&err), err);
     check(err, "Getting KERNEL_NUM_ARGS failed for " + filename);
     
     // Copied into temp buffer because cl.hpp seems to produce invalid strings somehow
@@ -83,7 +84,8 @@ void Kernel::build(cl::Context& context, cl::Device& device, cl::Platform& platf
     char buffer[128];
     for (cl_uint i = 0; i < numArgs; i++)
     {
-        std::string argname = m_kernel.getArgInfo<CL_KERNEL_ARG_NAME>(i, &err);
+        std::string argname;
+        CLT_CALL(argname = m_kernel.getArgInfo<CL_KERNEL_ARG_NAME>(i, &err), err);
         check(err, "Getting CL_KERNEL_ARG_NAME failed for " + filename);
         snprintf(buffer, sizeof(buffer), "%s", argname.c_str());
         argMap[buffer] = i; // save to mapping

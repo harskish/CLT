@@ -49,6 +49,7 @@ public:
 
     // Flag that enables CPU debugging on Intel processors
     static void setCpuDebug(bool v) { Kernel::CPU_DEBUG = v; }
+    static bool isCpuDebug() { return Kernel::CPU_DEBUG; }
 
 private:
     // For checking if recompilation is necessary

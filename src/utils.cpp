@@ -205,6 +205,11 @@ void setCpuDebug(bool v)
     Kernel::setCpuDebug(v);
 }
 
+bool isCpuDebug()
+{
+    return Kernel::isCpuDebug();
+}
+
 State initialize(const std::string& platformName, const std::string& deviceName)
 {
     State state;

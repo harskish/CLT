@@ -50,6 +50,7 @@ void printDevices();
 void setKernelCacheDir(const std::string path);
 void setGlobalBuildOptions(const std::string opts);
 void setCpuDebug(bool v);
+bool isCpuDebug();
 
 bool endsWith(const std::string s, const std::string end);
 std::string unixifyPath(std::string path);

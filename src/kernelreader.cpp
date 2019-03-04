@@ -1,6 +1,7 @@
 #include "kernelreader.hpp"
 #include "utils.hpp"
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>

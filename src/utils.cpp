@@ -11,7 +11,7 @@
 #include <OpenCL/cl_gl_ext.h>
 #include <OpenGL/OpenGL.h>
 #elif defined(__linux__)
-#include <GL/glxew.h>
+#include <GL/glx.h>
 #elif defined(_WIN32)
 #define NOMINMAX
 #include <Windows.h>

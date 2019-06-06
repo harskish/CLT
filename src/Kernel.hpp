@@ -23,8 +23,9 @@ public:
     void build(cl::Context& context, cl::Device& device, cl::Platform& platform, bool setArgs = true);
     void rebuild(bool setArgs);
 
-    template <typename T>
-    cl_int setArg(const std::string name, const T& value) {
+    template <typename... Args>
+    cl_int setArg(const std::string name, Args... args)
+    {
         auto it = argMap.find(name);
         if (it == argMap.end())
         {
@@ -33,7 +34,7 @@ public:
         }
         else
         {
-            return m_kernel.setArg(it->second, value);
+            return m_kernel.setArg(it->second, args...);
         }
     }
 

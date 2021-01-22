@@ -28,7 +28,7 @@ public:
         if (gid >= LEN)
             return;
     
-        output[gid] = gid;
+        output[gid] = pow(input[gid], (float)POWR);
     })
     */
 };

@@ -290,11 +290,11 @@ State initialize(const std::string& platformName, const std::string& deviceName)
             #endif
                 0
             };
-
+        #endif
+            
             std::cout << "Creating GL-CL context" << std::endl;
             CLT_CALL(state.context = cl::Context(devices, props, NULL, NULL, &err), err);
             state.hasGLInterop = true;
-        #endif
         }
     }
     else {
